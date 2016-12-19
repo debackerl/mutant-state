@@ -37,13 +37,13 @@ ArraySetter.prototype.applyTo = function(array, mutate) {
 	if(!mutate)
 		array = Array.apply(null, array);
 	
-	if(this.value === removed) {
-		array.copyWithin(this.index, this.index+1);
-		--array.length;
-	} else {
+	if(this.value !== removed) {
 		if(this.index >= array.length)
 			array.length = this.index + 1;
 		array[this.index] = applyTo(this.value, array[this.index]);
+	} else if(array.length) {
+		array.copyWithin(this.index, this.index+1);
+		--array.length;
 	}
 	
 	return array;
@@ -72,6 +72,8 @@ function ArrayConcatenater(array) {
 }
 
 ArrayConcatenater.prototype.applyTo = function(array) {
+	if(!array)
+		return this.array;
 	return array.concat(this.array);
 };
 

@@ -1,7 +1,7 @@
 {
 	"name": "mutant-state",
 	"title": "Create new objects from immutable objects and arrays, changing only what's required.",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"author": "Laurent Debacker <debackerl gmail com>",
 	"license": "MIT",
 	"scripts": {

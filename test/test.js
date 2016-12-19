@@ -3,29 +3,43 @@ let m = require('..');
 
 function testOperation(operation, initialState, expectedState) {
 	var backup = JSON.stringify(initialState);
-	assert.deepEqual(operation.applyTo(initialState), expectedState);
+	assert.deepEqual(m.applyTo(operation, initialState), expectedState);
 	assert.deepEqual(initialState, JSON.parse(backup));
 }
 
+describe('applyTo()', function() {
+	it('must copy constant', function() {
+		testOperation(123, "abc", 123);
+	});
+});
+
 describe('patch()', function() {
+	it('must create new object', function() {
+		testOperation(m.patch({}), null, {});
+	});
+
 	it('must add new member', function() {
 		testOperation(m.patch({a: 1}), {b: 2}, {a: 1, b: 2});
 	});
-	
+
 	it('must update existing member', function() {
 		testOperation(m.patch({a: 1}), {a: 0, b: 2}, {a: 1, b: 2});
 	});
-	
+
 	it('must recursively update member', function() {
 		testOperation(m.patch({a: m.patch({b: 0})}), {a: {b: 2}}, {a: {b: 0}});
 	});
-	
+
 	it('must suppress existing member', function() {
 		testOperation(m.patch({a: m.removed}), {a: 0, b: 2}, {b: 2});
 	});
 });
 
 describe('set()', function() {
+	it('must create new array', function() {
+		testOperation(m.set(0, 8), null, [8]);
+	});
+	
 	it('must update existing element', function() {
 		testOperation(m.set(1, 0), [1,2,3], [1,0,3]);
 	});
@@ -40,6 +54,10 @@ describe('set()', function() {
 });
 
 describe('remove()', function() {
+	it('must create a new array', function() {
+		testOperation(m.remove(0), null, []);
+	});
+
 	it('must remove element at the middle', function() {
 		testOperation(m.remove(1), [1,2,3], [1,3]);
 	});
@@ -54,6 +72,10 @@ describe('remove()', function() {
 });
 
 describe('insert()', function() {
+	it('must create new array', function() {
+		testOperation(m.insert(0, 8), null, [8]);
+	});
+
 	it('must insert at the middle', function() {
 		testOperation(m.insert(1, 0), [1,2,3], [1,0,2,3]);
 	});
@@ -68,6 +90,10 @@ describe('insert()', function() {
 });
 
 describe('concat()', function() {
+	it('must create new array', function() {
+		testOperation(m.concat([1,2,3]), null, [1,2,3]);
+	});
+
 	it('must concatenate new elements at the end', function() {
 		testOperation(m.concat([4,5,6]), [1,2,3], [1,2,3,4,5,6]);
 	});
