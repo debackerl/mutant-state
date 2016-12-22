@@ -118,7 +118,7 @@ function compose(/*...*/) {
 }
 
 function applyTo(operation, value) {
-	if(operation.__proto__.applyTo !== undefined)
+	if(typeof(operation) !== 'undefined' && operation !== null && typeof(operation.__proto__.applyTo) !== 'undefined')
 		return operation.applyTo(value);
 	return operation;
 }
