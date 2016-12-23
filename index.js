@@ -84,8 +84,10 @@ function Composition(operations) {
 Composition.prototype.applyTo = function(value) {
 	let mutated = false;
 	for(let op of this.operations) {
-		value = op.applyTo(value, mutated);
-		mutated = true;
+		if(op) {
+			value = op.applyTo(value, mutated);
+			mutated = true;
+		}
 	}
 	return value;
 };
