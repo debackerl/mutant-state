@@ -49,6 +49,23 @@ ArraySetter.prototype.applyTo = function(array, mutate) {
 	return array;
 };
 
+function ArrayRemover(value) {
+	this.value = value;
+}
+
+ArrayRemover.prototype.applyTo = function(array, mutate) {
+	if(!mutate)
+		array = Array.apply(null, array);
+	
+	let w = 0;
+	for(let v of array)
+		if(v !== this.value)
+			array[w++] = v;
+	array.length = w;
+	
+	return array;
+};
+
 function ArrayInserter(index, value) {
 	this.index = index;
 	this.value = value;
@@ -77,6 +94,17 @@ ArrayConcatenater.prototype.applyTo = function(array) {
 	return array.concat(this.array);
 };
 
+function ArrayPusher(value) {
+	this.value = value;
+}
+
+ArrayPusher.prototype.applyTo = function(array, mutate) {
+	if(!mutate)
+		array = Array.apply(null, array);
+	array.push(this.value);
+	return array;
+};
+
 function Composition(operations) {
 	this.operations = operations;
 }
@@ -103,8 +131,12 @@ function set(index, value) {
 	return new ArraySetter(index, value);
 }
 
-function remove(index) {
+function removeAt(index) {
 	return new ArraySetter(index, removed);
+}
+
+function remove(value) {
+	return new ArrayRemover(value);
 }
 
 function insert(index, value) {
@@ -113,6 +145,10 @@ function insert(index, value) {
 
 function concat(array) {
 	return new ArrayConcatenater(array);
+}
+
+function push(value) {
+	return new ArrayPusher(value);
 }
 
 function compose(/*...*/) {
@@ -125,4 +161,4 @@ function applyTo(operation, value) {
 	return operation;
 }
 
-module.exports = { removed, patch, set, remove, insert, concat, compose, applyTo };
+module.exports = { removed, patch, set, removeAt, remove, insert, concat, push, compose, applyTo };

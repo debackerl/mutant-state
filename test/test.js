@@ -53,21 +53,39 @@ describe('set()', function() {
 	});
 });
 
-describe('remove()', function() {
+describe('removeAt()', function() {
 	it('must create a new array', function() {
-		testOperation(m.remove(0), null, []);
+		testOperation(m.removeAt(0), null, []);
 	});
 
 	it('must remove element at the middle', function() {
-		testOperation(m.remove(1), [1,2,3], [1,3]);
+		testOperation(m.removeAt(1), [1,2,3], [1,3]);
 	});
 
 	it('must remove first element', function() {
-		testOperation(m.remove(0), [1,2,3], [2,3]);
+		testOperation(m.removeAt(0), [1,2,3], [2,3]);
 	});
 
 	it('must remove last element', function() {
-		testOperation(m.remove(2), [1,2,3], [1,2]);
+		testOperation(m.removeAt(2), [1,2,3], [1,2]);
+	});
+});
+
+describe('remove()', function() {
+	it('must remove element at the middle', function() {
+		testOperation(m.remove(2), [1,2,3], [1,3]);
+	});
+
+	it('must remove first element', function() {
+		testOperation(m.remove(1), [1,2,3], [2,3]);
+	});
+
+	it('must remove last element', function() {
+		testOperation(m.remove(3), [1,2,3], [1,2]);
+	});
+
+	it('must remove two elements', function() {
+		testOperation(m.remove(2), [1,2,3,2], [1,3]);
 	});
 });
 
@@ -96,6 +114,16 @@ describe('concat()', function() {
 
 	it('must concatenate new elements at the end', function() {
 		testOperation(m.concat([4,5,6]), [1,2,3], [1,2,3,4,5,6]);
+	});
+});
+
+describe('push()', function() {
+	it('must create new array', function() {
+		testOperation(m.push(1), null, [1]);
+	});
+
+	it('must concatenate new value at the end', function() {
+		testOperation(m.push(4), [1,2,3], [1,2,3,4]);
 	});
 });
 
