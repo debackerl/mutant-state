@@ -7,9 +7,63 @@ function testOperation(operation, initialState, expectedState) {
 	assert.deepEqual(initialState, JSON.parse(backup));
 }
 
+function testReplace(newState, initialState, areEqual) {
+	var res = m.applyTo(m.replace(newState), initialState);
+	if(areEqual)
+		assert.equal(res, initialState);
+	else
+		assert.equal(res, newState);
+}
+
 describe('applyTo()', function() {
 	it('must copy constant', function() {
 		testOperation(123, "abc", 123);
+	});
+});
+
+describe('replace()', function() {
+	it('must replace object with array', function() {
+		testReplace([], {}, false);
+	});
+
+	it('must replace array with object', function() {
+		testReplace({}, [], false);
+	});
+
+	it('must keep empty array', function() {
+		testReplace([], [], true);
+	});
+
+	it('must keep empty object', function() {
+		testReplace({}, {}, true);
+	});
+
+	it('must keep array', function() {
+		testReplace([1,2], [1,2], true);
+	});
+
+	it('must keep object', function() {
+		testReplace({a:1,b:2}, {a:1,b:2}, true);
+	});
+
+	it('must replace array', function() {
+		testReplace([1], [1,2], false);
+	});
+
+	it('must replace object', function() {
+		testReplace({a:1}, {a:1,b:2}, false);
+	});
+
+	it('must return new date', function() {
+		testReplace(new Date(), {}, false);
+	});
+
+	it('must return new boolean', function() {
+		testReplace(true, {}, false);
+	});
+
+	it('must return new number', function() {
+		testReplace(4, {}, false);
 	});
 });
 

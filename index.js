@@ -1,31 +1,99 @@
 'use strict';
 
-function ObjectMerger() { }
+var hasOwn = Object.prototype.hasOwnProperty;
 
-ObjectMerger.prototype.applyTo = function(object, mutate) {
-	if(!mutate) {
-		let merged = {};
-		if(typeof(object) === 'object') {
-			for(let k in object) {
-				if(Object.prototype.hasOwnProperty.call(object, k)) {
-					merged[k] = object[k];
-				}
+function tp(v) {
+	var type = typeof(v);
+	if(v instanceof Array)
+		type = 'array';
+	else if(v instanceof Date)
+		type = 'date';
+	return type;
+}
+
+function Replacer(value) {
+	this.value = value;
+}
+
+Replacer.prototype.applyTo = function(object) {
+	var type = tp(this.value);
+	
+	if(type !== tp(object))
+		return this.value;
+	
+	switch(type) {
+	case 'object':
+		var n = 0;
+		for(var key in object)
+			if(hasOwn.call(object, key))
+				++n;
+		
+		for(var key in this.value) {
+			if(hasOwn.call(this.value, key)) {
+				--n;
+				if(this.value[key] !== object[key])
+					return this.value;
 			}
 		}
-		object = merged;
-	}
+		
+		if(n !== 0)
+			return this.value;
+		
+		break;
 	
-	for(let k in this) {
-		if(Object.prototype.hasOwnProperty.call(this, k)) {
-			let v = this[k];
-			if(v === removed)
-				delete object[k];
-			else
-				object[k] = applyTo(v, object[k]);
-		}
+	case 'array':
+		if(this.value.length !== object.length)
+			return this.value;
+		
+		for(var i in this.value)
+			if(this.value[i] !== object[i])
+				return this.value;
+		
+		break;
+	
+	default:
+		return this.value;
 	}
 	
 	return object;
+};
+
+function ObjectMerger() { }
+
+ObjectMerger.prototype.applyTo = function(object, mutate) {
+	var twin;
+	if(mutate)
+		twin = object;
+	else {
+		twin = {};
+		if(typeof(object) === 'object') {
+			for(let k in object) {
+				if(hasOwn.call(object, k)) {
+					twin[k] = object[k];
+				}
+			}
+		}
+	}
+	
+	var mutated = object === null || typeof(object) !== 'object' || object instanceof Array || object instanceof Date;
+	for(let k in this) {
+		if(hasOwn.call(this, k)) {
+			let v = this[k];
+			if(v === removed) {
+				if(k in twin) {
+					mutated = true;
+					delete twin[k];
+				}
+			} else {
+				var prev = twin[k];
+				var next = applyTo(v, prev);
+				mutated = mutated || prev !== next;
+				twin[k] = next;
+			}
+		}
+	}
+	
+	return mutated ? twin : object;
 };
 
 function ArraySetter(index, value) {
@@ -40,7 +108,11 @@ ArraySetter.prototype.applyTo = function(array, mutate) {
 	if(this.value !== removed) {
 		if(this.index >= array.length)
 			array.length = this.index + 1;
-		array[this.index] = applyTo(this.value, array[this.index]);
+		var prev = array[this.index];
+		var next = applyTo(this.value, prev);
+		if(prev === next)
+			return array;
+		array[this.index] = next;
 	} else if(array.length) {
 		array.copyWithin(this.index, this.index+1);
 		--array.length;
@@ -54,16 +126,19 @@ function ArrayRemover(value) {
 }
 
 ArrayRemover.prototype.applyTo = function(array, mutate) {
-	if(!mutate)
-		array = Array.apply(null, array);
+	var twin = mutate ? array : Array.apply(null, array);
 	
 	let w = 0;
-	for(let v of array)
+	for(let v of twin)
 		if(v !== this.value)
-			array[w++] = v;
-	array.length = w;
+			twin[w++] = v;
 	
-	return array;
+	if(w === array.length)
+		return array;
+	
+	twin.length = w;
+	
+	return twin;
 };
 
 function ArrayInserter(index, value) {
@@ -91,6 +166,8 @@ function ArrayConcatenater(array) {
 ArrayConcatenater.prototype.applyTo = function(array) {
 	if(!array)
 		return this.array;
+	if(this.array.length === 0)
+		return array;
 	return array.concat(this.array);
 };
 
@@ -110,17 +187,20 @@ function Composition(operations) {
 }
 
 Composition.prototype.applyTo = function(value) {
-	let mutated = false;
-	for(let op of this.operations) {
-		if(op) {
-			value = op.applyTo(value, mutated);
-			mutated = true;
-		}
+	var mutated = false;
+	for(var op of this.operations) {
+		var prev = value;
+		value = op.applyTo(prev, mutated);
+		mutated = mutated || value !== prev;
 	}
 	return value;
 };
 
 const removed = Object.freeze({});
+
+function replace(value) {
+	return new Replacer(value);
+}
 
 function patch(diff) {
 	diff.__proto__ = ObjectMerger.prototype;
@@ -156,9 +236,9 @@ function compose(/*...*/) {
 }
 
 function applyTo(operation, value) {
-	if(typeof(operation) !== 'undefined' && operation !== null && typeof(operation.__proto__.applyTo) !== 'undefined')
+	if(operation.__proto__.applyTo !== undefined)
 		return operation.applyTo(value);
 	return operation;
 }
 
-module.exports = { removed, patch, set, removeAt, remove, insert, concat, push, compose, applyTo };
+module.exports = { removed, replace, patch, set, removeAt, remove, insert, concat, push, compose, applyTo };
