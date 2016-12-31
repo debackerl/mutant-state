@@ -67,7 +67,7 @@ ObjectMerger.prototype.applyTo = function(object, mutate) {
 	else {
 		twin = {};
 		if(typeof(object) === 'object') {
-			for(let k in object) {
+			for(var k in object) {
 				if(hasOwn.call(object, k)) {
 					twin[k] = object[k];
 				}
@@ -76,9 +76,9 @@ ObjectMerger.prototype.applyTo = function(object, mutate) {
 	}
 	
 	var mutated = object === null || typeof(object) !== 'object' || object instanceof Array || object instanceof Date;
-	for(let k in this) {
+	for(var k in this) {
 		if(hasOwn.call(this, k)) {
-			let v = this[k];
+			var v = this[k];
 			if(v === removed) {
 				if(k in twin) {
 					mutated = true;
@@ -128,8 +128,8 @@ function ArrayRemover(value) {
 ArrayRemover.prototype.applyTo = function(array, mutate) {
 	var twin = mutate ? array : Array.apply(null, array);
 	
-	let w = 0;
-	for(let v of twin)
+	var w = 0;
+	for(var v of twin)
 		if(v !== this.value)
 			twin[w++] = v;
 	
@@ -236,7 +236,7 @@ function compose(/*...*/) {
 }
 
 function applyTo(operation, value) {
-	if(operation.__proto__.applyTo !== undefined)
+	if(operation.__proto__ && operation.__proto__.applyTo)
 		return operation.applyTo(value);
 	return operation;
 }
