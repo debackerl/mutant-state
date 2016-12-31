@@ -236,7 +236,7 @@ function compose(/*...*/) {
 }
 
 function applyTo(operation, value) {
-	if(operation.__proto__ && operation.__proto__.applyTo)
+	if(operation && operation.__proto__.applyTo)
 		return operation.applyTo(value);
 	return operation;
 }
