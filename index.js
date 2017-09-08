@@ -129,9 +129,11 @@ ArrayRemover.prototype.applyTo = function(array, mutate) {
 	var twin = mutate ? array : Array.apply(null, array);
 	
 	var w = 0;
-	for(var v of twin)
+	for(var i = 0, n = twin.length; i < n; ++i) {
+		var v = twin[i];
 		if(v !== this.value)
 			twin[w++] = v;
+	}
 	
 	if(w === array.length)
 		return array;
@@ -188,7 +190,8 @@ function Composition(operations) {
 
 Composition.prototype.applyTo = function(value) {
 	var mutated = false;
-	for(var op of this.operations) {
+	for(var i = 0, n = this.operations.length; i < n; ++i) {
+		var op = this.operations[i];
 		var prev = value;
 		value = op.applyTo(prev, mutated);
 		mutated = mutated || value !== prev;
