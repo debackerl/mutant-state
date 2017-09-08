@@ -244,4 +244,4 @@ function applyTo(operation, value) {
 	return operation;
 }
 
-module.exports = { removed, replace, patch, set, removeAt, remove, insert, concat, push, compose, applyTo };
+module.exports = { removed:removed, replace:replace, patch:patch, set:set, removeAt:removeAt, remove:remove, insert:insert, concat:concat, push:push, compose:compose, applyTo:applyTo };
