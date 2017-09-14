@@ -199,7 +199,7 @@ Composition.prototype.applyTo = function(value) {
 	return value;
 };
 
-const removed = Object.freeze({});
+var removed = Object.freeze({});
 
 function replace(value) {
 	return new Replacer(value);
